@@ -1,0 +1,19 @@
+{
+  "appId": "com.nineplates.app",
+  "appName": "9 Plates",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 2000,
+      "backgroundColor": "#f97316",
+      "showSpinner": false
+    },
+    "StatusBar": {
+      "style": "default",
+      "backgroundColor": "#f97316"
+    }
+  }
+}
