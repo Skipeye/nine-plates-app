@@ -6,7 +6,7 @@ const STORAGE_KEY = 'nine-plates-data';
 export const usePlates = () => {
   const [plates, setPlates] = useState<Plate[]>([]);
   const [user, setUser] = useState<User>({
-    plan: 'free',
+    plan: 'free' as const,
     maxPlates: 9,
     platesSmashed: 0,
     platesSaved: 0,
