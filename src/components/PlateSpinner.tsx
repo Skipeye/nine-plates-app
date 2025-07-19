@@ -69,17 +69,8 @@ export const PlateSpinner: React.FC<PlateSpinnerProps> = ({ plate, onComplete, o
     if (daysLeft <= 0) {
       return 'plate-falling';
     } else if (daysLeft <= 5) {
-      // Play wobble sound when plate becomes urgent (but only once per urgency state)
-      if (!hasPlayedWobbleSound) {
-        setTimeout(() => playWobbleSound(), 100);
-        setHasPlayedWobbleSound(true);
-      }
       return 'plate-wobbling';
     } else {
-      // Reset wobble sound flag when not urgent
-      if (hasPlayedWobbleSound) {
-        setHasPlayedWobbleSound(false);
-      }
       return 'plate-spinning';
     }
   };
@@ -133,8 +124,150 @@ export const PlateSpinner: React.FC<PlateSpinnerProps> = ({ plate, onComplete, o
     };
   };
 
+  // Handle wobble sound effect
+  React.useEffect(() => {
+    const daysLeft = getDaysUntilDeadline();
+    
+    if (daysLeft <= 5 && daysLeft > 0) {
+      // Play wobble sound when plate becomes urgent (but only once per urgency state)
+      if (!hasPlayedWobbleSound) {
+        setTimeout(() => playWobbleSound(), 100);
+        setHasPlayedWobbleSound(true);
+      }
+    } else {
+      // Reset wobble sound flag when not urgent
+      if (hasPlayedWobbleSound) {
+        setHasPlayedWobbleSound(false);
+      }
+    }
+  }, [getDaysUntilDeadline(), plate.id, hasPlayedWobbleSound, playWobbleSound]);
+
   const getUrgencyIndicator = () => {
     const daysLeft = getDaysUntilDeadline();
     if (daysLeft <= 0) return '🔥 OVERDUE';
     if (daysLeft <= 1) return '🚨 TODAY';
-    if (daysLeft <= 2) return '
+    if (daysLeft <= 2) return '⚠️ URGENT';
+    if (daysLeft <= 5) return '⏰ Soon';
+    return `📅 ${daysLeft}d`;
+  };
+
+  const plateColors = getPlateColor();
+  return (
+    <div className="plate-container">
+      {/* Spinning Plate - Side View */}
+      <div className="plate-spinner-wrapper">
+        <div 
+          className={`plate-side-view ${getPlateAnimation()}`}
+          style={{
+            background: plateColors.main,
+            borderRadius: '45px / 10px'
+          }}
+          onClick={handleComplete}
+        >
+          {/* Plate edge (what we see from the side) */}
+          <div 
+            className="plate-edge"
+          >
+            <div 
+              className="plate-rim"
+              style={{
+                background: plateColors.rim,
+                borderRadius: '45px / 3px'
+              }}
+            ></div>
+            <div 
+              className="plate-surface"
+              style={{
+                background: plateColors.surface,
+                boxShadow: 'inset 0 1px 2px rgba(255, 255, 255, 0.4), inset 0 -1px 1px rgba(0, 0, 0, 0.1)',
+                borderRadius: '43px / 8px'
+              }}
+            ></div>
+          </div>
+          
+          {/* Wobble intensity indicator */}
+          <div className="wobble-lines">
+            <div className="wobble-line wobble-line-1"></div>
+            <div className="wobble-line wobble-line-2"></div>
+            <div className="wobble-line wobble-line-3"></div>
+          </div>
+        </div>
+        
+        {/* Pole */}
+        <div className="plate-pole"></div>
+        
+        {/* Base */}
+        <div className="plate-base"></div>
+      </div>
+      
+      {/* Plate Title and Urgency */}
+      <div className="plate-title" style={{
+        color: (() => {
+          const daysLeft = getDaysUntilDeadline();
+          if (daysLeft <= 0) return '#7f1d1d';
+          if (daysLeft <= 2) return '#dc2626';
+          if (daysLeft <= 5) return '#d97706';
+          return plate.consequence <= 3 ? '#16a34a' : plate.consequence <= 6 ? '#ca8a04' : '#dc2626';
+        })()
+      }}>
+        {plate.title}
+      </div>
+      
+      <div className="urgency-indicator-container">
+        {isEditingDeadline ? (
+          <div className="deadline-editor">
+            <input
+              type="date"
+              value={tempDeadline}
+              onChange={(e) => setTempDeadline(e.target.value)}
+              onKeyDown={handleKeyPress}
+              className="deadline-input"
+              autoFocus
+            />
+            <div className="deadline-actions">
+              <button
+                onClick={handleDeadlineSubmit}
+                className="deadline-button deadline-save"
+              >
+                ✓
+              </button>
+              <button
+                onClick={handleDeadlineCancel}
+                className="deadline-button deadline-cancel"
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div 
+            className={`urgency-indicator ${getDaysUntilDeadline() > 0 ? 'editable' : ''}`}
+            onClick={handleDeadlineClick}
+            title={getDaysUntilDeadline() > 0 ? 'Click to edit deadline' : 'Cannot edit overdue deadline'}
+          >
+            {getUrgencyIndicator()}
+            {getDaysUntilDeadline() > 0 && (
+              <span className="edit-icon">✏️</span>
+            )}
+          </div>
+        )}
+      </div>
+      
+      {/* Actions */}
+      <div className="plate-actions">
+        <button
+          onClick={handleComplete}
+          className="plate-button plate-button-done"
+        >
+          Done
+        </button>
+        <button
+          onClick={handleSmash}
+          className="plate-button plate-button-smash"
+        >
+          Smash
+        </button>
+      </div>
+    </div>
+  );
+};
