@@ -1,3 +1,4 @@
+# Updated to trigger workflow visibility
 name: Build Android App Bundle
 
 on:
@@ -45,8 +46,7 @@ jobs:
         ./gradlew bundleRelease
     
     - name: Upload App Bundle
-      uses: uses: actions/upload-artifact@v4
-
+      uses: actions/upload-artifact@v4
       with:
         name: app-bundle
         path: android/app/build/outputs/bundle/release/app-release.aab
